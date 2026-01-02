@@ -51,11 +51,3 @@ export interface UserData {
   preventPublicHolidayLeave: boolean;
   lastUpdated?: number;
 }
-
-// Added UserProfile interface to resolve type errors in authentication services
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-}
