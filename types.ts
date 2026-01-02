@@ -24,7 +24,6 @@ export interface Holiday {
   date: string; // YYYY-MM-DD
   name: string;
   isFederal: boolean;
-  states?: string[]; // Empty means all (Federal)
 }
 
 export enum ThemeKey {

@@ -104,8 +104,7 @@ const App: React.FC = () => {
     const mappedCustom: Holiday[] = data.customHolidays.map(ch => ({
       date: ch.date,
       name: ch.name,
-      isFederal: false,
-      states: []
+      isFederal: false
     }));
 
     return [...systemHolidays, ...mappedCustom];
