@@ -1,0 +1,7 @@
+{
+  "name": "MyCuti — Malaysia Holiday Planner",
+  "description": "A smart holiday and annual leave planner specifically designed for Malaysians. Track federal and state public holidays, manage leave balances, and discover long weekend opportunities.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
