@@ -33,12 +33,10 @@ const Calendar: React.FC<CalendarProps> = ({
   const days = eachDayOfInterval({ start: startDate, end: endDate });
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  // This key changes whenever the month or year changes,
-  // prompting React to remount the grid and trigger CSS animations.
   const transitionKey = format(currentDate, 'yyyy-MM');
 
   return (
-    <div className="w-full select-none overflow-hidden">
+    <div className="w-full select-none overflow-visible">
       <div className="grid grid-cols-7 mb-4 border-b border-gray-100/50 pb-2">
         {weekDays.map(day => (
           <div key={day} className="text-center text-[10px] font-black uppercase tracking-widest text-gray-400">
@@ -47,7 +45,6 @@ const Calendar: React.FC<CalendarProps> = ({
         ))}
       </div>
       
-      {/* Animated container for smooth month transitions */}
       <div 
         key={transitionKey} 
         className="grid grid-cols-7 gap-1 md:gap-2 animate-in fade-in slide-in-from-bottom-2"
@@ -59,7 +56,6 @@ const Calendar: React.FC<CalendarProps> = ({
           const matchingHolidays = holidays.filter(h => h.date === dateStr);
           const leave = leaves.find(l => l.date === dateStr);
           const isWe = isWeekend(day);
-          
           const hasHoliday = matchingHolidays.length > 0;
           
           return (
@@ -72,15 +68,57 @@ const Calendar: React.FC<CalendarProps> = ({
                 ${isToday(day) ? 'ring-2 ring-teal-500 bg-white/90 shadow-lg scale-[1.02] z-10' : 'hover:scale-[1.02]'}
                 ${leave ? 'bg-orange-50 ring-1 ring-orange-200/50' : ''}
                 ${hasHoliday ? 'bg-rose-50 ring-1 ring-rose-200/50' : ''}
-                active:scale-95 cursor-pointer overflow-hidden group
+                active:scale-95 cursor-pointer group
               `}
             >
+              {/* Tooltip implementation */}
+              {(leave || hasHoliday) && isCurrentMonth && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block z-[60] pointer-events-none animate-in fade-in zoom-in slide-in-from-bottom-2 duration-150">
+                  <div className="bg-gray-900/95 backdrop-blur-md text-white p-3 rounded-xl shadow-2xl border border-white/10 text-left">
+                    {/* Holiday Section in Tooltip */}
+                    {matchingHolidays.map((h, i) => (
+                      <div key={i} className="mb-2 last:mb-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className={`w-1.5 h-1.5 rounded-full ${h.isFederal ? 'bg-rose-500' : 'bg-blue-400'}`} />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white/50">
+                            {h.isFederal ? 'Federal' : 'Custom'} Holiday
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold leading-tight">{h.name}</p>
+                      </div>
+                    ))}
+
+                    {/* Divider if both exist */}
+                    {hasHoliday && leave && <div className="my-2 h-px bg-white/10" />}
+
+                    {/* Leave Section in Tooltip */}
+                    {leave && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <span>{LEAVE_ICONS[leave.type].emoji}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">{leave.type} Leave</span>
+                        </div>
+                        {leave.note ? (
+                          <p className="text-xs italic text-gray-300 leading-snug border-l-2 border-white/20 pl-2 mt-1">
+                            "{leave.note}"
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-white/40 italic">No notes added</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Tooltip Arrow */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gray-900/95" />
+                  </div>
+                </div>
+              )}
+
               <span className={`text-xs sm:text-sm font-bold ${isWe ? 'text-rose-500' : 'text-gray-900'} ${isToday(day) ? 'text-teal-600' : ''}`}>
                 {format(day, 'd')}
               </span>
               
               <div className="w-full flex flex-col gap-1 mt-auto overflow-hidden">
-                {/* Holidays: Show Badge with Name (Removed icons) */}
                 {matchingHolidays.map((holiday, hIdx) => (
                   <div 
                     key={hIdx} 
@@ -88,18 +126,13 @@ const Calendar: React.FC<CalendarProps> = ({
                       text-[7px] md:text-[8px] px-1 py-0.5 rounded shadow-sm truncate font-bold tracking-tighter w-full text-left
                       ${holiday.isFederal ? 'bg-rose-600 text-white' : 'bg-blue-600 text-white'}
                     `}
-                    title={`${holiday.isFederal ? 'Federal' : 'State/Custom'} Holiday: ${holiday.name}`}
                   >
                     {holiday.name}
                   </div>
                 ))}
 
-                {/* Leaves: Show Big Emoji Only */}
                 {leave && (
-                  <div 
-                    className="flex justify-center sm:justify-start"
-                    title={`${leave.type} Leave${leave.note ? ': ' + leave.note : ''}`}
-                  >
+                  <div className="flex justify-center sm:justify-start">
                     <span className="text-xl sm:text-2xl transition-transform group-hover:scale-125 drop-shadow-sm filter">
                       {LEAVE_ICONS[leave.type].emoji}
                     </span>
@@ -110,9 +143,6 @@ const Calendar: React.FC<CalendarProps> = ({
           );
         })}
       </div>
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 0px; height: 0px; }
-      `}</style>
     </div>
   );
 };
